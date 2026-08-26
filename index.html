@@ -4,95 +4,86 @@
 <meta charset="UTF-8">
 <title>HTML Windows</title>
 <style>
-  body {margin:0; font-family:sans-serif; background:#008080;}
-  #taskbar {position:fixed; bottom:0; left:0; right:0; height:40px; background:#202020; color:white; display:flex; align-items:center; padding:0 10px;}
-  #start {background:#404040; padding:5px 15px; cursor:pointer; border-radius:5px; margin-right:10px;}
-  #desktop {position:absolute; top:0; left:0; right:0; bottom:40px;}
-  .icon {width:80px; text-align:center; color:white; cursor:pointer; margin:10px; display:inline-block;}
-  .window {position:absolute; top:100px; left:100px; width:600px; height:400px; background:#f0f0f0; border:2px solid #202020;}
-  .titlebar {background:#202020; color:white; padding:5px; cursor:move;}
-  .content {padding:10px; height:calc(100% - 30px); overflow:auto;}
-  #startmenu {position:fixed; bottom:40px; left:10px; width:200px; background:#303030; color:white; display:none; flex-direction:column;}
-  #startmenu div {padding:10px; cursor:pointer;}
-  #startmenu div:hover {background:#505050;}
+body {
+  background-color: teal;
+  font-family: sans-serif;
+  margin: 0;
+}
+#desktop {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+.icon {
+  display: inline-block;
+  margin: 10px;
+  text-align: center;
+  color: white;
+  cursor: pointer;
+}
+.window {
+  position: absolute;
+  top: 100px;
+  left: 100px;
+  width: 600px;
+  height: 400px;
+  background: #fff;
+  border: 2px solid #000;
+  box-shadow: 4px 4px 10px rgba(0,0,0,0.4);
+}
+.titlebar {
+  background: #333;
+  color: white;
+  padding: 5px;
+}
+iframe {
+  width: 100%;
+  height: calc(100% - 30px);
+  border: none;
+}
+#taskbar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: black;
+  color: white;
+  padding: 5px;
+}
 </style>
 </head>
 <body>
 <div id="desktop">
-  <div class="icon" onclick="openGoogle()">🌐<br>Google</div>
-  <div class="icon" onclick="openYouTube()">📺<br>YouTube</div>
-  <div class="icon" onclick="openCarGame()">🚗<br>Araba Oyunu</div>
-</div>
-
-<div id="taskbar">
-  <div id="start">Başlat</div>
-</div>
-
-<div id="startmenu">
-  <div onclick="openGoogle()">🌐 Google</div>
-  <div onclick="openYouTube()">📺 YouTube</div>
-  <div onclick="openCarGame()">🚗 Araba Oyunu</div>
+  <div class="icon" onclick="openBrowser('Google','https://www.google.com')">🌐<br>Google</div>
+  <div class="icon" onclick="openBrowser('YouTube','https://www.youtube.com')">📺<br>YouTube</div>
+  <div class="icon" onclick="toggleInternet()">🔌<br>İnternet Aç/Kapat</div>
+  <div id="taskbar">Başlat</div>
 </div>
 
 <script>
-document.getElementById("start").onclick=()=>{
-  let menu=document.getElementById("startmenu");
-  menu.style.display=(menu.style.display==="flex")?"none":"flex";
-};
+let internet=true; // başlangıçta internet açık
 
-function openWindow(title,content){
+function toggleInternet(){
+  internet=!internet;
+  alert(internet ? "İnternet bağlandı!" : "İnternet kesildi!");
+}
+
+function openBrowser(title,url){
   let win=document.createElement("div");
   win.className="window";
-  let bar=document.createElement("div");
-  bar.className="titlebar";
-  bar.innerText=title;
-  let close=document.createElement("span");
-  close.innerText=" ❌";
-  close.style.float="right";
-  close.style.cursor="pointer";
-  close.onclick=()=>win.remove();
-  bar.appendChild(close);
-  bar.onmousedown=dragMouseDown;
-  let cont=document.createElement("div");
-  cont.className="content";
-  cont.innerHTML=content;
-  win.appendChild(bar);
-  win.appendChild(cont);
+  win.innerHTML=`
+    <div class='titlebar'>${title}</div>
+    <iframe id="webview" src=""></iframe>
+  `;
   document.body.appendChild(win);
 
-  // sürükleme desteği
-  let pos1=0,pos2=0,pos3=0,pos4=0;
-  function dragMouseDown(e){e.preventDefault(); pos3=e.clientX; pos4=e.clientY; document.onmouseup=closeDrag; document.onmousemove=elementDrag;}
-  function elementDrag(e){e.preventDefault(); pos1=pos3-e.clientX; pos2=pos4-e.clientY; pos3=e.clientX; pos4=e.clientY; win.style.top=(win.offsetTop-pos2)+"px"; win.style.left=(win.offsetLeft-pos1)+"px";}
-  function closeDrag(){document.onmouseup=null; document.onmousemove=null;}
-}
-
-function openGoogle(){
-  openWindow("Google","<iframe src='https://www.google.com' width='100%' height='100%'></iframe>");
-}
-
-function openYouTube(){
-  openWindow("YouTube","<iframe src='https://www.youtube.com' width='100%' height='100%'></iframe>");
-}
-
-function openCarGame(){
-  openWindow("Araba Oyunu","<canvas id='carCanvas' width='500' height='300' style='background:#333'></canvas>");
-  let c=document.getElementById("carCanvas"); 
-  let ctx=c.getContext("2d");
-  let x=250,y=150;
-  document.addEventListener("keydown",e=>{
-    if(e.key==="ArrowUp") y-=5;
-    if(e.key==="ArrowDown") y+=5;
-    if(e.key==="ArrowLeft") x-=5;
-    if(e.key==="ArrowRight") x+=5;
-    draw();
-  });
-  function draw(){
-    ctx.fillStyle="#333"; ctx.fillRect(0,0,c.width,c.height);
-    ctx.fillStyle="red"; ctx.fillRect(x,y,40,20); // araba
-    ctx.fillStyle="yellow"; ctx.fillRect(200,100,60,30); // engel
+  // internet kontrolü
+  if(internet){
+    win.querySelector("#webview").src=url;
+  } else {
+    win.querySelector("#webview").srcdoc="<h2 style='text-align:center;color:red;'>İnternet yok!</h2>";
   }
-  draw();
 }
 </script>
 </body>
