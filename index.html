@@ -61,6 +61,24 @@ iframe {
   background: black;
   color: white;
   padding: 5px;
+  display: flex;
+  justify-content: space-between;
+}
+#shutdownBtn {
+  background: crimson;
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 5px 10px;
+}
+#shutdownScreen {
+  display:none;
+  background:black;
+  color:red;
+  font-size:40px;
+  text-align:center;
+  padding-top:20%;
+  height:100vh;
 }
 </style>
 </head>
@@ -74,8 +92,13 @@ iframe {
   <div class="icon" onclick="openApp('Mini Oyun','<p style=\'text-align:center;\'>Buraya oyun gelecek 🎮</p>')">🎮<br>Mini Oyun</div>
   <div class="icon" onclick="openApp('Müzik Çalar','<audio controls><source src=\'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3\' type=\'audio/mpeg\'></audio>')">🎵<br>Müzik Çalar</div>
   <div class="icon" onclick="openApp('Dosya Gezgini','<ul><li>Dosya1.txt</li><li>Resim.png</li><li>Video.mp4</li></ul>')">📁<br>Dosya Gezgini</div>
-  <div id="taskbar">Başlat</div>
+  <div id="taskbar">
+    <span>Başlat</span>
+    <button id="shutdownBtn" onclick="shutdownPC()">PC Kapat</button>
+  </div>
 </div>
+
+<div id="shutdownScreen">💻 PC Kapatıldı<br><br>Kullanıcı: Uras<br><br><span style="font-size:20px;">Boşluk tuşuna basarak açabilirsiniz...</span></div>
 
 <script>
 let internet=true; // başlangıçta internet açık
@@ -140,6 +163,19 @@ function makeDraggable(win){
     }
   });
 }
+
+function shutdownPC(){
+  document.getElementById("desktop").style.display="none";
+  document.getElementById("shutdownScreen").style.display="block";
+}
+
+// Boşluk tuşuna basınca PC açılır
+document.addEventListener("keydown", e=>{
+  if(e.code==="Space" && document.getElementById("shutdownScreen").style.display==="block"){
+    document.getElementById("shutdownScreen").style.display="none";
+    document.getElementById("desktop").style.display="block";
+  }
+});
 </script>
 </body>
 </html>
