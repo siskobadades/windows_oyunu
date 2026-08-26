@@ -37,6 +37,16 @@ body {
   color: white;
   padding: 5px;
   cursor: move;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.closeBtn {
+  background: red;
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 2px 8px;
 }
 iframe {
   width: 100%;
@@ -79,7 +89,10 @@ function openBrowser(title,url){
   let win=document.createElement("div");
   win.className="window";
   win.innerHTML=`
-    <div class='titlebar'>${title}</div>
+    <div class='titlebar'>
+      ${title}
+      <button class='closeBtn'>X</button>
+    </div>
     <iframe id="webview"></iframe>
   `;
   document.body.appendChild(win);
@@ -95,6 +108,7 @@ function openBrowser(title,url){
   const titleBar=win.querySelector(".titlebar");
   let offsetX=0, offsetY=0, dragging=false;
   titleBar.addEventListener("mousedown", e=>{
+    if(e.target.classList.contains("closeBtn")) return; // kapatma tuşu hariç
     dragging=true;
     offsetX=e.clientX-win.offsetLeft;
     offsetY=e.clientY-win.offsetTop;
@@ -105,6 +119,11 @@ function openBrowser(title,url){
       win.style.left=(e.clientX-offsetX)+"px";
       win.style.top=(e.clientY-offsetY)+"px";
     }
+  });
+
+  // kapatma butonu
+  win.querySelector(".closeBtn").addEventListener("click", ()=>{
+    win.remove();
   });
 }
 </script>
