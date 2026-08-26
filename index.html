@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>HTML Windows</title>
+<title>HTML Windows Masaüstü</title>
 <style>
 body {
   background-color: teal;
@@ -36,6 +36,7 @@ body {
   background: #333;
   color: white;
   padding: 5px;
+  cursor: move;
 }
 iframe {
   width: 100%;
@@ -58,6 +59,11 @@ iframe {
   <div class="icon" onclick="openBrowser('Google','https://www.google.com')">🌐<br>Google</div>
   <div class="icon" onclick="openBrowser('YouTube','https://www.youtube.com')">📺<br>YouTube</div>
   <div class="icon" onclick="toggleInternet()">🔌<br>İnternet Aç/Kapat</div>
+  <div class="icon">📝<br>Not Defteri</div>
+  <div class="icon">⚙️<br>Ayarlar</div>
+  <div class="icon">🎮<br>Mini Oyun</div>
+  <div class="icon">🎵<br>Müzik Çalar</div>
+  <div class="icon">📁<br>Dosya Gezgini</div>
   <div id="taskbar">Başlat</div>
 </div>
 
@@ -74,7 +80,7 @@ function openBrowser(title,url){
   win.className="window";
   win.innerHTML=`
     <div class='titlebar'>${title}</div>
-    <iframe id="webview" src=""></iframe>
+    <iframe id="webview"></iframe>
   `;
   document.body.appendChild(win);
 
@@ -84,6 +90,22 @@ function openBrowser(title,url){
   } else {
     win.querySelector("#webview").srcdoc="<h2 style='text-align:center;color:red;'>İnternet yok!</h2>";
   }
+
+  // pencereyi sürükleme
+  const titleBar=win.querySelector(".titlebar");
+  let offsetX=0, offsetY=0, dragging=false;
+  titleBar.addEventListener("mousedown", e=>{
+    dragging=true;
+    offsetX=e.clientX-win.offsetLeft;
+    offsetY=e.clientY-win.offsetTop;
+  });
+  document.addEventListener("mouseup", ()=>dragging=false);
+  document.addEventListener("mousemove", e=>{
+    if(dragging){
+      win.style.left=(e.clientX-offsetX)+"px";
+      win.style.top=(e.clientY-offsetY)+"px";
+    }
+  });
 }
 </script>
 </body>
