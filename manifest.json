@@ -1,0 +1,14 @@
+{
+  "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "siskobadades",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "siskobadades",
+  "start_url": "/",
+  "theme_color": "#ffffff",
+  "id": "siskobadades_emülatör",
+  "description": "siskobadades emülator",
+  "lang": "tr"
+}
