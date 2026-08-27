@@ -2,98 +2,226 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>PC Simülasyonu</title>
+<title>HTML Windows Masaüstü</title>
 <style>
-  body {margin:0; background:#222; font-family:Arial; color:#fff;}
-  .desktop {display:flex; flex-wrap:wrap; padding:20px;}
-  .icon {width:100px; text-align:center; margin:15px; cursor:pointer; background:#444; border-radius:10px; padding:10px;}
-  .window {position:absolute; top:50px; left:50px; width:600px; height:400px; background:#fff; color:#000; border:2px solid #000; overflow:auto;}
-  .titlebar {background:#333; color:#fff; padding:5px; display:flex; justify-content:space-between;}
+body {
+  background-color: teal;
+  font-family: sans-serif;
+  margin: 0;
+}
+#desktop {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+.icon {
+  display: inline-block;
+  margin: 10px;
+  text-align: center;
+  color: white;
+  cursor: pointer;
+}
+.window {
+  position: absolute;
+  top: 100px;
+  left: 100px;
+  width: 600px;
+  height: 400px;
+  background: #fff;
+  border: 2px solid #000;
+  box-shadow: 4px 4px 10px rgba(0,0,0,0.4);
+}
+.titlebar {
+  background: #333;
+  color: white;
+  padding: 5px;
+  cursor: move;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.closeBtn {
+  background: red;
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 2px 8px;
+}
+iframe {
+  width: 100%;
+  height: calc(100% - 30px);
+  border: none;
+}
+#taskbar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: black;
+  color: white;
+  padding: 5px;
+  display: flex;
+  justify-content: space-between;
+}
+#shutdownBtn {
+  background: crimson;
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 5px 10px;
+}
+#shutdownScreen {
+  display:none;
+  background:black;
+  color:red;
+  font-size:40px;
+  text-align:center;
+  padding-top:20%;
+  height:100vh;
+}
+video {
+  width: 100%;
+  height: calc(100% - 30px);
+  background: black;
+}
 </style>
 </head>
 <body>
-
-<div class="desktop">
-  <div class="icon" onclick="openApp('google')">🌐<br>Google</div>
-  <div class="icon" onclick="openApp('snapchat')">👻<br>Snapchat</div>
-  <div class="icon" onclick="openApp('youtube')">📺<br>YouTube</div>
-  <div class="icon" onclick="openApp('facebook')">📘<br>Facebook</div>
-  <div class="icon" onclick="openApp('instagram')">📸<br>Instagram</div>
-  <div class="icon" onclick="openApp('tiktok')">🎵<br>TikTok</div>
-  <div class="icon" onclick="openApp('duolingo')">🦉<br>Duolingo</div>
-  <div class="icon" onclick="openApp('camera')">📷<br>Kamera</div>
-  <div class="icon" onclick="openApp('copilot')">🤖<br>Copilot</div>
-  <div class="icon" onclick="openApp('charge')">🔌<br>Şarj</div>
+<div id="desktop">
+  <div class="icon" onclick="openBrowser('Google','https://www.google.com')">🌐<br>Google</div>
+  <div class="icon" onclick="openBrowser('YouTube','https://www.youtube.com')">📺<br>YouTube</div>
+  <div class="icon" onclick="toggleInternet()">🔌<br>İnternet Aç/Kapat</div>
+  <div class="icon" onclick="openApp('Not Defteri','<textarea style=\'width:100%;height:100%;\'></textarea>')">📝<br>Not Defteri</div>
+  <div class="icon" onclick="openApp('Ayarlar','<button onclick=&quot;document.body.style.background=\'black\'&quot;>Tema Siyah</button>')">⚙️<br>Ayarlar</div>
+  <div class="icon" onclick="openApp('Mini Oyun','<p style=\'text-align:center;\'>Buraya oyun gelecek 🎮</p>')">🎮<br>Mini Oyun</div>
+  <div class="icon" onclick="openApp('Müzik Çalar','<audio controls><source src=\'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3\' type=\'audio/mpeg\'></audio>')">🎵<br>Müzik Çalar</div>
+  <div class="icon" onclick="openApp('Dosya Gezgini','<ul><li>Dosya1.txt</li><li>Resim.png</li><li>Video.mp4</li></ul>')">📁<br>Dosya Gezgini</div>
+  <div class="icon" onclick="openCamera()">📷<br>Kamera</div>
+  <div id="taskbar">
+    <span>Başlat</span>
+    <button id="shutdownBtn" onclick="shutdownPC()">PC Kapat</button>
+  </div>
 </div>
 
-<script>
-let windows=[];
-let camStream=null;
-const NOKIA_SRC="https://www.youtube.com/embed/2Z4m4lnjxkY";
+<div id="shutdownScreen">💻 PC Kapatıldı<br><br>Kullanıcı: Uras<br><br><span style="font-size:20px;">Boşluk tuşuna basarak açabilirsiniz...</span></div>
 
-function openApp(app){
+<script>
+let internet=true; // başlangıçta internet açık
+let cameraStream=null;
+
+function toggleInternet(){
+  internet=!internet;
+  alert(internet ? "İnternet bağlandı!" : "İnternet kesildi!");
+}
+
+function openBrowser(title,url){
   let win=document.createElement("div");
   win.className="window";
-  win.innerHTML=`<div class="titlebar">${app} <button onclick="closeWin(this)">X</button></div>`;
-
-  if(app==="google"){
-    win.innerHTML+=`
-      <h2>Google</h2>
-      <input id="gAra" placeholder="Google'da ara" style="width:80%; padding:8px;">
-      <button onclick="googleAra(this)">Ara</button>
-      <div id="gSonuc"></div>
-    `;
-  }
-  if(app==="snapchat"){win.innerHTML+=`<p>Snapchat simülasyonu</p>`;}
-  if(app==="youtube"){win.innerHTML+=`<iframe width="100%" height="300" src="${NOKIA_SRC}" allowfullscreen></iframe>`;}
-  if(app==="facebook"){win.innerHTML+=`<iframe width="100%" height="300" src="${NOKIA_SRC}" allowfullscreen></iframe>`;}
-  if(app==="instagram"){win.innerHTML+=`<iframe width="100%" height="300" src="${NOKIA_SRC}" allowfullscreen></iframe>`;}
-  if(app==="tiktok"){win.innerHTML+=`<iframe width="100%" height="300" src="${NOKIA_SRC}" allowfullscreen></iframe>`;}
-  if(app==="duolingo"){win.innerHTML+=`<iframe width="100%" height="300" src="${NOKIA_SRC}" allowfullscreen></iframe>`;}
-  if(app==="camera"){
-    win.innerHTML+=`
-      <h2>Kamera</h2>
-      <button onclick='startCam("user")'>Ön Kamera</button>
-      <button onclick='startCam("environment")'>Arka Kamera</button><br>
-      <video id="cam" autoplay playsinline width="100%" height="300"></video>
-    `;
-  }
-  if(app==="copilot"){win.innerHTML+=`<p>Copilot: Adını yaz <input id="ad"><button onclick="selamVer()">Gönder</button><div id="selam"></div></p>`;}
-  if(app==="charge"){win.innerHTML+=`<p>Şarj oluyor... ⚡</p>`;}
-
+  win.innerHTML=`
+    <div class='titlebar'>
+      ${title}
+      <button class='closeBtn'>X</button>
+    </div>
+    <iframe id="webview"></iframe>
+  `;
   document.body.appendChild(win);
-  windows.push(win);
-}
 
-function closeWin(btn){
-  let win=btn.parentElement.parentElement;
-  // Kamera penceresi kapanıyorsa stream'i durdur
-  if(win.querySelector("#cam") && camStream){
-    camStream.getTracks().forEach(t=>t.stop());
-    camStream=null;
+  if(internet){
+    win.querySelector("#webview").src=url;
+  } else {
+    win.querySelector("#webview").srcdoc="<h2 style='text-align:center;color:red;'>İnternet yok!</h2>";
   }
-  win.remove();
+
+  makeDraggable(win);
+  win.querySelector(".closeBtn").addEventListener("click", ()=>win.remove());
 }
 
-function googleAra(btn){
-  let q=document.getElementById("gAra").value;
-  let parent=btn.parentElement;
-  parent.innerHTML=`<iframe src="https://www.google.com/search?q=${encodeURIComponent(q)}" style="width:100%; height:350px; border:none;"></iframe>`;
+function openApp(title,content){
+  let win=document.createElement("div");
+  win.className="window";
+  win.innerHTML=`
+    <div class='titlebar'>
+      ${title}
+      <button class='closeBtn'>X</button>
+    </div>
+    <div style="height:calc(100% - 30px);overflow:auto;">${content}</div>
+  `;
+  document.body.appendChild(win);
+
+  makeDraggable(win);
+  win.querySelector(".closeBtn").addEventListener("click", ()=>win.remove());
 }
 
-function selamVer(){
-  let ad=document.getElementById("ad").value;
-  document.getElementById("selam").innerText="Merhaba "+ad+" 👋";
+function openCamera(){
+  let win=document.createElement("div");
+  win.className="window";
+  win.innerHTML=`
+    <div class='titlebar'>
+      Kamera
+      <button class='closeBtn'>X</button>
+    </div>
+    <video id="cameraView" autoplay></video>
+  `;
+  document.body.appendChild(win);
+
+  makeDraggable(win);
+
+  // Kamera aç
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(stream=>{
+      cameraStream=stream;
+      win.querySelector("#cameraView").srcObject=stream;
+    })
+    .catch(err=>{
+      win.querySelector("#cameraView").outerHTML="<p style='color:red;text-align:center;'>Kamera erişimi reddedildi!</p>";
+    });
+
+  // Kapatınca kamera durdur
+  win.querySelector(".closeBtn").addEventListener("click", ()=>{
+    if(cameraStream){
+      cameraStream.getTracks().forEach(track=>track.stop());
+      cameraStream=null;
+    }
+    win.remove();
+  });
 }
 
-function startCam(facing){
-  navigator.mediaDevices.getUserMedia({video:{facingMode:facing}})
-  .then(stream=>{
-    camStream=stream;
-    document.getElementById("cam").srcObject=stream;
-  })
-  .catch(err=>alert("Kamera hatası: "+err));
+function makeDraggable(win){
+  const titleBar=win.querySelector(".titlebar");
+  let offsetX=0, offsetY=0, dragging=false;
+  titleBar.addEventListener("mousedown", e=>{
+    if(e.target.classList.contains("closeBtn")) return;
+    dragging=true;
+    offsetX=e.clientX-win.offsetLeft;
+    offsetY=e.clientY-win.offsetTop;
+  });
+  document.addEventListener("mouseup", ()=>dragging=false);
+  document.addEventListener("mousemove", e=>{
+    if(dragging){
+      win.style.left=(e.clientX-offsetX)+"px";
+      win.style.top=(e.clientY-offsetY)+"px";
+    }
+  });
 }
+
+function shutdownPC(){
+  document.getElementById("desktop").style.display="none";
+  document.getElementById("shutdownScreen").style.display="block";
+  // PC kapanınca kamera da kapansın
+  if(cameraStream){
+    cameraStream.getTracks().forEach(track=>track.stop());
+    cameraStream=null;
+  }
+}
+
+// Boşluk tuşuna basınca PC açılır
+document.addEventListener("keydown", e=>{
+  if(e.code==="Space" && document.getElementById("shutdownScreen").style.display==="block"){
+    document.getElementById("shutdownScreen").style.display="none";
+    document.getElementById("desktop").style.display="block";
+  }
+});
 </script>
 </body>
 </html>
